@@ -23,8 +23,7 @@ pipeline {
                 echo 'Running unit tests...'
                 sh 'make test-unit'
 
-                echo "Publishing unit tests reports and coverage..."
-                archiveArtifacts artifacts: 'results/*result.xml', fingerprint: true
+                echo "Archiving coverage results..."
                 archiveArtifacts artifacts: 'results/coverage*', fingerprint: true
             }
         }
@@ -33,9 +32,6 @@ pipeline {
             steps {
                 echo 'Running API tests...'
                 sh 'make test-api'     
-
-                
-                archiveArtifacts artifacts: 'results/*result.xml', fingerprint: true
             }
         }
 
@@ -43,9 +39,6 @@ pipeline {
             steps {
                 echo 'Running E2E tests...'
                 sh 'make test-e2e'      
-
-                
-                archiveArtifacts artifacts: 'results/*result.xml', fingerprint: true
             }
         }
     }
@@ -53,12 +46,13 @@ pipeline {
     post {
 
         always {
-            echo "Publishing test results..."
+            echo "Archiving and publishing test results..."
+            archiveArtifacts artifacts: 'results/*result.xml', fingerprint: true
             junit 'results/*_result.xml'
         }
 
         failure {
-            mail to: 'kevin.aceves@hotmail.com',
+            mail to: "${EMAIL_RECIPIENT}",
                  subject: "Pipeline FAILED: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
                  body: """\
                     Pipeline has failed.
